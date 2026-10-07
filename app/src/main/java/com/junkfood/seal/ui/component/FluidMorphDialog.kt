@@ -231,7 +231,11 @@ fun FluidMorphPanel(
                 modifier = Modifier
                     .width(widthAnim.value)
                     .heightIn(max = maxPanelHeight)
-                    .animateContentSize(animationSpec = morphSpec)
+                    .animateContentSize(
+                        animationSpec = if (animationsEnabled)
+                            spring(dampingRatio = 0.9f, stiffness = 130f)
+                        else snap()
+                    )
                     .clip(RoundedCornerShape(cornerAnim.value)),
                 shape = RoundedCornerShape(cornerAnim.value),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
