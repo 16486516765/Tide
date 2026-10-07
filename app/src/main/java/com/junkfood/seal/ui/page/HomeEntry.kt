@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
+import com.junkfood.seal.ui.common.ErrorBus
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -101,6 +104,13 @@ fun HomeEntry(
     var showUpdateDialog by rememberSaveable { mutableStateOf(false) }
     var currentDownloadStatus by remember { mutableStateOf(UpdateUtil.DownloadStatus.NotYet as UpdateUtil.DownloadStatus) }
     val scope = rememberCoroutineScope()
+    // 全局报错提示：收集 ErrorBus，统一用 Snackbar 展示
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) {
+        ErrorBus.errors.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
     var updateJob: Job? = null
     var latestRelease by remember { mutableStateOf(UpdateUtil.LatestRelease()) }
     val settings =
@@ -289,7 +299,7 @@ fun HomeEntry(
                         }.onFailure {
                             it.printStackTrace()
                             currentDownloadStatus = UpdateUtil.DownloadStatus.NotYet
-                            ToastUtil.makeToastSuspend(context.getString(R.string.app_update_failed))
+                            ErrorBus.post(context.getString(R.string.app_update_failed))
                             return@launch
                         }
                     }
@@ -298,6 +308,11 @@ fun HomeEntry(
                 downloadStatus = currentDownloadStatus
             )
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 } // Box
 } // HomeEntry

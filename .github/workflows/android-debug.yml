@@ -38,3 +38,11 @@ jobs:
         path: app/build/outputs/apk/debug/*-arm64-v8a-debug.apk
         if-no-files-found: error
         retention-days: 20
+
+  # 构建失败时推送到手机（ntfy）：手机装 ntfy App 并订阅 tide-build-7f3a9c 即可收到
+  notify-failure:
+    needs: build
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -d "Tide 构建失败（${{ github.workflow }}），去 Actions 看日志" ntfy.sh/tide-build-7f3a9c

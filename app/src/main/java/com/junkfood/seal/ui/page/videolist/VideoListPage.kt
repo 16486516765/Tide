@@ -59,7 +59,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import com.junkfood.seal.ui.common.motion.StaggerEntranceItem
 import com.junkfood.seal.util.PreferenceUtil.getBoolean
 import com.junkfood.seal.util.UI_ANIMATION
@@ -184,7 +183,7 @@ fun VideoListPage(
 
     // 需求1：交错入场动画 —— 动画总开关 + 每 item 生命周期只播一次的去重集合
     val animationsEnabled = remember { UI_ANIMATION.getBoolean(true) }
-    val staggerPlayedKeys = remember { mutableStateSetOf<Int>() }
+    var staggerPlayedKeys by remember { mutableStateOf(setOf<Int>()) }
 
     @Composable
     fun FilterChips(modifier: Modifier = Modifier) {
@@ -500,7 +499,7 @@ fun VideoListPage(
                         StaggerEntranceItem(
                             index = index,
                             playAnimation = !staggerPlayedKeys.contains(id),
-                            onPlayed = { staggerPlayedKeys.add(id) },
+                            onPlayed = { staggerPlayedKeys = staggerPlayedKeys + id },
                             animationsEnabled = animationsEnabled
                         ) {
                             AnimatedVisibility(

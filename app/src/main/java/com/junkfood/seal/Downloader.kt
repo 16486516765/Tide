@@ -21,6 +21,7 @@ import com.junkfood.seal.util.Format
 import com.junkfood.seal.util.NotificationUtil
 import com.junkfood.seal.util.PlaylistResult
 import com.junkfood.seal.util.PreferenceUtil.getString
+import com.junkfood.seal.ui.common.ErrorBus
 import com.junkfood.seal.util.ToastUtil
 import com.junkfood.seal.util.VideoClip
 import com.junkfood.seal.util.VideoInfo
@@ -646,7 +647,8 @@ object Downloader {
         th.printStackTrace()
         val resId =
             if (isFetchingInfo) R.string.fetch_info_error_msg else R.string.download_error_msg
-        ToastUtil.makeToastSuspend(context.getString(resId))
+        // 统一走全局报错提示（HomeEntry 顶层 Snackbar 展示），后台失败另有系统通知兜底
+        ErrorBus.post(context.getString(resId))
 
         val notificationTitle = title ?: url
 

@@ -35,7 +35,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -260,7 +259,7 @@ fun ColumnScope.AnimationPreviewContent(
 
 @Composable
 private fun MiniStaggerDemo(animationsEnabled: Boolean) {
-    val playedKeys = remember { mutableStateSetOf<Int>() }
+    var playedKeys by remember { mutableStateOf(setOf<Int>()) }
     var replayKey by remember { mutableStateOf(0) }
 
     key(replayKey) {
@@ -269,7 +268,7 @@ private fun MiniStaggerDemo(animationsEnabled: Boolean) {
                 StaggerEntranceItem(
                     index = index,
                     playAnimation = !playedKeys.contains(index),
-                    onPlayed = { playedKeys.add(index) },
+                    onPlayed = { playedKeys = playedKeys + index },
                     animationsEnabled = animationsEnabled
                 ) {
                     Surface(
@@ -290,7 +289,7 @@ private fun MiniStaggerDemo(animationsEnabled: Boolean) {
     }
     TextButton(
         onClick = {
-            playedKeys.clear()
+            playedKeys = emptySet()
             replayKey++
         }
     ) {
