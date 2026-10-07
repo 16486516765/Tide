@@ -1,6 +1,10 @@
 package com.junkfood.seal.ui.page.command
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +25,7 @@ import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.UnfoldMore
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -43,19 +49,29 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.junkfood.seal.Downloader
 import com.junkfood.seal.R
 import com.junkfood.seal.ui.component.ButtonChip
+import com.junkfood.seal.util.PreferenceUtil.getBoolean
+import com.junkfood.seal.util.UI_ANIMATION
 
 
 private const val TAG = "TaskLogPage"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun TaskLogPage(onNavigateBack: () -> Unit, taskHashCode: Int) {
+fun TaskLogPage(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onNavigateBack: () -> Unit,
+    taskHashCode: Int
+) {
     Log.d(TAG, "TaskLogPage: $taskHashCode")
+    // 需求2：动画总开关，关闭时共享元素退化为普通页面
+    val animationsEnabled = remember { UI_ANIMATION.getBoolean(true) }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val task = Downloader.mutableTaskList.values.find { it.hashCode() == taskHashCode } ?: return
     val clipboardManager = LocalClipboardManager.current
@@ -156,6 +172,45 @@ fun TaskLogPage(onNavigateBack: () -> Unit, taskHashCode: Int) {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
+            // 需求2：详情页 header，与任务列表卡片共享元素（背景与容器连续平滑缩放）
+            task.run {
+                val headerModifier = with(sharedTransitionScope) {
+                    if (animationsEnabled) {
+                        Modifier.sharedElement(
+                            state = rememberSharedContentState(key = "task_card_$taskHashCode"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            boundsTransform = { _, _ ->
+                                spring(
+                                    dampingRatio = 0.9f,
+                                    stiffness = 320f
+                                )
+                            }
+                        )
+                    } else Modifier
+                }
+                Surface(
+                    modifier = headerModifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = CardDefaults.shape,
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = url,
+                            style = MaterialTheme.typography.titleSmall,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = template.name,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            }
             SelectionContainer() {
                 Text(
                     modifier = Modifier

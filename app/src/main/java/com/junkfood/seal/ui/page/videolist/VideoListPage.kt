@@ -59,6 +59,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
+import com.junkfood.seal.ui.common.motion.StaggerEntranceItem
+import com.junkfood.seal.util.PreferenceUtil.getBoolean
+import com.junkfood.seal.util.UI_ANIMATION
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -177,6 +181,10 @@ fun VideoListPage(
     var showImportDialog by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
+
+    // 需求1：交错入场动画 —— 动画总开关 + 每 item 生命周期只播一次的去重集合
+    val animationsEnabled = remember { UI_ANIMATION.getBoolean(true) }
+    val staggerPlayedKeys = remember { mutableStateSetOf<Int>() }
 
     @Composable
     fun FilterChips(modifier: Modifier = Modifier) {
@@ -482,18 +490,25 @@ fun VideoListPage(
                     }
                 }
             }
-            for (info in videoList) {
+            for ((index, info) in videoList.withIndex()) {
 
                 item(
                     key = info.id,
                     contentType = { info.videoPath.contains(AUDIO_REGEX) }) {
                     with(info) {
-                        AnimatedVisibility(
-                            modifier = Modifier,
-                            visible = info.filterSort(viewState, filterSet),
-                            exit = shrinkVertically() + fadeOut(),
-                            enter = expandVertically() + fadeIn()
+                        // 需求1：Stagger Delay 交错入场 + Spring Cascade 微弹性上滑
+                        StaggerEntranceItem(
+                            index = index,
+                            playAnimation = !staggerPlayedKeys.contains(id),
+                            onPlayed = { staggerPlayedKeys.add(id) },
+                            animationsEnabled = animationsEnabled
                         ) {
+                            AnimatedVisibility(
+                                modifier = Modifier,
+                                visible = info.filterSort(viewState, filterSet),
+                                exit = shrinkVertically() + fadeOut(),
+                                enter = expandVertically() + fadeIn()
+                            ) {
                             MediaListItem(
                                 modifier = Modifier,
                                 title = videoTitle,
@@ -529,6 +544,7 @@ fun VideoListPage(
                                 }
                             )
                         }
+                        } // StaggerEntranceItem
                     }
                 }
             }

@@ -84,7 +84,8 @@ android {
 
 
     defaultConfig {
-        applicationId = "com.junkfood.seal"
+        // 魔改版包名（原作者要求衍生品不得再以 "Seal" 命名）
+        applicationId = "com.limao.tide"
         minSdk = 21
         targetSdk = 34
         versionCode = 11310

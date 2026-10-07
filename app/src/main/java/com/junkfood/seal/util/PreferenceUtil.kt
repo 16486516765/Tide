@@ -59,6 +59,7 @@ const val SUBDIRECTORY_PLAYLIST_TITLE = "subdirectory_playlist_title"
 const val PLAYLIST = "playlist"
 private const val LANGUAGE = "language"
 const val NOTIFICATION = "notification"
+const val UI_ANIMATION = "ui_animation"
 private const val THEME_COLOR = "theme_color"
 const val PALETTE_STYLE = "palette_style"
 const val SUBTITLE = "subtitle"
@@ -192,6 +193,7 @@ private val BooleanPreferenceDefaults = mapOf(
     YT_DLP_AUTO_UPDATE to true,
     NOTIFICATION to true,
     EMBED_METADATA to true,
+    UI_ANIMATION to true,
 )
 
 private val IntPreferenceDefaults = mapOf(

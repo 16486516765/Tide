@@ -2,6 +2,8 @@ package com.junkfood.seal.ui.page.settings.appearance
 
 import android.os.Build
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,8 +26,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Colorize
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Animation
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +67,8 @@ import com.junkfood.seal.ui.common.LocalPaletteStyleIndex
 import com.junkfood.seal.ui.common.LocalSeedColor
 import com.junkfood.seal.ui.common.Route
 import com.junkfood.seal.ui.component.BackButton
+import com.junkfood.seal.ui.component.FluidMorphPanel
+import com.junkfood.seal.ui.component.AnimationPreviewContent
 import com.junkfood.seal.ui.component.LargeTopAppBar
 import com.junkfood.seal.ui.component.PreferenceItem
 import com.junkfood.seal.ui.component.PreferenceSwitch
@@ -71,6 +77,9 @@ import com.junkfood.seal.ui.component.VideoCard
 import com.junkfood.seal.util.DarkThemePreference.Companion.OFF
 import com.junkfood.seal.util.DarkThemePreference.Companion.ON
 import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.util.PreferenceUtil.getBoolean
+import com.junkfood.seal.util.PreferenceUtil.updateBoolean
+import com.junkfood.seal.util.UI_ANIMATION
 import com.junkfood.seal.util.STYLE_MONOCHROME
 import com.junkfood.seal.util.STYLE_TONAL_SPOT
 import com.junkfood.seal.util.paletteStyles
@@ -101,6 +110,46 @@ private val DrawableList = listOf(
 fun AppearancePreferences(
     onNavigateBack: () -> Unit,
     onNavigateTo: (String) -> Unit
+) {
+    var showAnimationPreview by remember { mutableStateOf(false) }
+    val uiAnimationEnabledPreview = remember(showAnimationPreview) {
+        UI_ANIMATION.getBoolean(true)
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        AppearancePreferencesContent(
+            onNavigateBack = onNavigateBack,
+            onNavigateTo = onNavigateTo,
+            onPreviewClick = { showAnimationPreview = true }
+        )
+
+        // 需求3：动画预览 overlay —— 胶囊→面板的流体形态变换演示
+        androidx.compose.animation.AnimatedVisibility(
+            visible = showAnimationPreview,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            FluidMorphPanel(
+                animationsEnabled = uiAnimationEnabledPreview,
+                onDismissRequest = { showAnimationPreview = false }
+            ) {
+                AnimationPreviewContent(
+                    animationsEnabled = uiAnimationEnabledPreview,
+                    onDismissRequest = { showAnimationPreview = false }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class
+)
+@Composable
+private fun AppearancePreferencesContent(
+    onNavigateBack: () -> Unit,
+    onNavigateTo: (String) -> Unit,
+    onPreviewClick: () -> Unit
 ) {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState(),
@@ -211,6 +260,23 @@ fun AppearancePreferences(
                     description = LocalDarkTheme.current.getDarkThemeDesc(),
                     onChecked = { PreferenceUtil.modifyDarkThemePreference(if (isDarkTheme) OFF else ON) },
                     onClick = { onNavigateTo(Route.DARK_THEME) })
+                var uiAnimationEnabled by remember {
+                    mutableStateOf(UI_ANIMATION.getBoolean(true))
+                }
+                PreferenceSwitchWithDivider(title = stringResource(id = R.string.ui_animation),
+                    description = stringResource(id = R.string.ui_animation_desc),
+                    icon = Icons.Outlined.Animation,
+                    isChecked = uiAnimationEnabled,
+                    onClick = {
+                        uiAnimationEnabled = !uiAnimationEnabled
+                        UI_ANIMATION.updateBoolean(uiAnimationEnabled)
+                    })
+                // 需求3：动画预览入口 —— 胶囊按钮→面板的流体形态变换演示
+                PreferenceItem(
+                    title = stringResource(id = R.string.ui_animation_preview),
+                    icon = Icons.Outlined.PlayArrow,
+                    onClick = onPreviewClick
+                )
                 if (Build.VERSION.SDK_INT >= 24) {
                     PreferenceItem(
                         title = stringResource(R.string.language),

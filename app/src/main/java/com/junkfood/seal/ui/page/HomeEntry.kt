@@ -8,6 +8,8 @@ import android.provider.Settings
 import android.webkit.CookieManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -87,6 +89,7 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "HomeEntry"
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeEntry(
     downloadViewModel: DownloadViewModel,
@@ -143,7 +146,10 @@ fun HomeEntry(
             .background(MaterialTheme.colorScheme.background)
     ) {
 
-        NavHost(
+        // 需求2：共享元素转场容器，TaskListPage(卡片) <-> TaskLogPage(详情) 共享元素
+        SharedTransitionLayout {
+            val sharedTransitionScope = this
+            NavHost(
             modifier = Modifier
                 .fillMaxWidth(
                     when (LocalWindowWidthState.current) {
@@ -177,6 +183,8 @@ fun HomeEntry(
             animatedComposable(Route.DOWNLOADS) { VideoListPage { onNavigateBack() } }
             animatedComposableVariant(Route.TASK_LIST) {
                 TaskListPage(
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = this,
                     onNavigateBack = onNavigateBack,
                     onNavigateToDetail = { navController.navigate(Route.TASK_LOG id it) }
                 )
@@ -186,6 +194,8 @@ fun HomeEntry(
                 arguments = listOf(navArgument(Route.TASK_HASHCODE) { type = NavType.IntType })
             ) {
                 TaskLogPage(
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = this,
                     onNavigateBack = onNavigateBack,
                     taskHashCode = it.arguments?.getInt(Route.TASK_HASHCODE) ?: -1
                 )
@@ -289,7 +299,8 @@ fun HomeEntry(
             )
         }
     }
-}
+} // Box
+} // HomeEntry
 
 fun NavGraphBuilder.settingsGraph(
     cookiesViewModel: CookiesViewModel,

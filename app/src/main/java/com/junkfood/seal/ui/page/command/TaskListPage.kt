@@ -1,6 +1,10 @@
 package com.junkfood.seal.ui.page.command
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,19 +81,29 @@ import com.junkfood.seal.ui.component.SealModalBottomSheetM2
 import com.junkfood.seal.ui.component.TaskStatus
 import com.junkfood.seal.ui.page.settings.command.CommandTemplateDialog
 import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.util.PreferenceUtil.getBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateInt
+import com.junkfood.seal.util.UI_ANIMATION
 import com.junkfood.seal.util.TEMPLATE_ID
 import com.junkfood.seal.util.matchUrlFromString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalSharedTransitionApi::class
 )
 @Composable
-fun TaskListPage(onNavigateBack: () -> Unit, onNavigateToDetail: (Int) -> Unit) {
+fun TaskListPage(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onNavigateBack: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit
+) {
     val scope = rememberCoroutineScope()
     val view = LocalView.current
+    // 需求2：动画总开关，关闭时共享元素退化为普通跳转
+    val animationsEnabled = remember { UI_ANIMATION.getBoolean(true) }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -132,6 +146,21 @@ fun TaskListPage(onNavigateBack: () -> Unit, onNavigateToDetail: (Int) -> Unit) 
             items(Downloader.mutableTaskList.values.toList().sortedBy { it.state.toStatus() },
                 key = { it.toKey() }) {
                 it.run {
+                    // 需求2：卡片容器作为共享元素，key 与详情页 header 对应
+                    val sharedElementModifier = with(sharedTransitionScope) {
+                        if (animationsEnabled) {
+                            Modifier.sharedElement(
+                                state = rememberSharedContentState(key = "task_card_${hashCode()}"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                boundsTransform = { _, _ ->
+                                    spring(
+                                        dampingRatio = 0.9f,
+                                        stiffness = 320f
+                                    )
+                                }
+                            )
+                        } else Modifier
+                    }
                     CustomCommandTaskItem(
                         status = state.toStatus(),
                         progress = if (state is Downloader.CustomCommandTask.State.Running) state.progress / 100f else 0f,
@@ -151,7 +180,7 @@ fun TaskListPage(onNavigateBack: () -> Unit, onNavigateToDetail: (Int) -> Unit) 
                         onShowLog = {
                             onNavigateToDetail(hashCode())
                         },
-                        modifier = Modifier.animateItem()
+                        modifier = sharedElementModifier.animateItem()
                     )
                 }
             }

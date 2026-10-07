@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Seal</string>
+    <string name="app_name" translatable="false">Tide</string>
     <string name="video_directory">Video folder</string>
     <string name="extract_audio">Save as audio</string>
     <string name="create_thumbnail">Save thumbnail</string>
@@ -234,6 +234,9 @@
     <string name="private_mode_desc">Disable download history</string>
     <string name="dynamic_color">Dynamic color</string>
     <string name="dynamic_color_desc">Apply colors from wallpapers to the app theme</string>
+    <string name="ui_animation">UI animations</string>
+    <string name="ui_animation_desc">Staggered entrances, shared element transitions and fluid morphs</string>
+    <string name="ui_animation_preview">Preview animations</string>
     <string name="download_with_cellular">Download using cellular</string>
     <string name="download_with_cellular_desc">Allow downloading media when connected to metered networks</string>
     <string name="download_disabled_with_cellular">Downloading with cellular network is disabled according to your settings</string>
