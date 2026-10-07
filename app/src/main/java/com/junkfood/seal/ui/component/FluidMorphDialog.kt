@@ -7,8 +7,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,7 +51,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.junkfood.seal.ui.common.motion.StaggerEntranceItem
 
@@ -172,63 +178,94 @@ fun FluidMorphPanel(
     panelContent: @Composable ColumnScope.() -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
     // 用 Animatable 保证反向 morph 完成的时机精确
     val widthAnim = remember { Animatable(COLLAPSED_WIDTH, Dp.VectorConverter) }
     val cornerAnim = remember { Animatable(COLLAPSED_CORNER, Dp.VectorConverter) }
+    // 位置动画：关闭时胶囊飞回右下角 FAB 处
+    val offsetAnim = remember { Animatable(IntOffset.Zero, IntOffset.VectorConverter) }
+    // 落位后的淡出，避免胶囊在右下角突兀消失
+    val alphaAnim = remember { Animatable(1f) }
     var contentExpanded by remember { mutableStateOf(false) }
+    var scrimTarget by remember { mutableStateOf(0f) }
+    val scrimAlpha by animateFloatAsState(
+        targetValue = scrimTarget,
+        animationSpec = tween(300),
+        label = "fluidScrimAlpha"
+    )
 
     val morphSpec: FiniteAnimationSpec<Dp> = remember(animationsEnabled) {
         if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 130f)
         else snap()
     }
-
-    // 入场：胶囊 → 面板
-    LaunchedEffect(Unit) {
-        contentExpanded = true
-        if (animationsEnabled) {
-            launch { widthAnim.animateTo(panelWidth, morphSpec) }
-            launch { cornerAnim.animateTo(EXPANDED_CORNER, morphSpec) }
-        } else {
-            widthAnim.snapTo(panelWidth)
-            cornerAnim.snapTo(EXPANDED_CORNER)
-        }
+    val offsetSpec: FiniteAnimationSpec<IntOffset> = remember(animationsEnabled) {
+        if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 130f)
+        else snap()
     }
 
-    // 关闭：面板 → 胶囊 → 消失（反向 morph）
-    fun dismiss() {
-        scope.launch {
-            if (animationsEnabled) {
-                contentExpanded = false
-                coroutineScope {
-                    launch { widthAnim.animateTo(COLLAPSED_WIDTH, morphSpec) }
-                    launch { cornerAnim.animateTo(COLLAPSED_CORNER, morphSpec) }
-                }
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        // 下载 FAB 中心相对屏幕中心的位置（右下角，约 24dp 边距 + 28dp 半径）
+        val fabOffset = remember(maxWidth, maxHeight) {
+            with(density) {
+                IntOffset(
+                    x = ((maxWidth - 104.dp) / 2).roundToPx(),
+                    y = ((maxHeight - 104.dp) / 2).roundToPx()
+                )
             }
-            onDismissRequest()
         }
-    }
+        // 面板最高占屏幕 85%，超出部分内部滚动
+        val maxPanelHeight = maxHeight * 0.85f
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+        // 入场：胶囊 → 面板
+        LaunchedEffect(Unit) {
+            contentExpanded = true
+            if (animationsEnabled) {
+                scrimTarget = 0.4f
+                launch { widthAnim.animateTo(panelWidth, morphSpec) }
+                launch { cornerAnim.animateTo(EXPANDED_CORNER, morphSpec) }
+            } else {
+                widthAnim.snapTo(panelWidth)
+                cornerAnim.snapTo(EXPANDED_CORNER)
+                scrimTarget = 0.4f
+            }
+        }
+
+        // 关闭：面板 → 胶囊（飞回 FAB 位置）→ 淡出消失
+        fun dismiss() {
+            scope.launch {
+                if (animationsEnabled) {
+                    contentExpanded = false
+                    scrimTarget = 0f
+                    coroutineScope {
+                        launch { widthAnim.animateTo(COLLAPSED_WIDTH, morphSpec) }
+                        launch { cornerAnim.animateTo(COLLAPSED_CORNER, morphSpec) }
+                        launch { offsetAnim.animateTo(fabOffset, offsetSpec) }
+                    }
+                    alphaAnim.animateTo(0f, tween(150))
+                }
+                onDismissRequest()
+            }
+        }
+
+        // 背景蒙层
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f))
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = scrimAlpha))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) { dismiss() }
         )
-        BoxWithConstraints(
+        // 面板：居中 + 位置偏移
+        Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            // 面板最高占屏幕 85%，超出部分内部滚动
-            val maxPanelHeight = maxHeight * 0.85f
             Surface(
                 modifier = Modifier
+                    .offset { offsetAnim.value }
+                    .graphicsLayer { alpha = alphaAnim.value }
                     .width(widthAnim.value)
                     .heightIn(max = maxPanelHeight)
                     .animateContentSize(
@@ -242,25 +279,25 @@ fun FluidMorphPanel(
                 tonalElevation = 6.dp,
                 shadowElevation = 8.dp
             ) {
-            AnimatedContent(
-                targetState = contentExpanded,
-                transitionSpec = { fadeIn() togetherWith fadeOut() },
-                label = "fluidPanelContent"
-            ) { isExpanded ->
-                if (isExpanded) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        panelContent()
-                    }
-                } else if (capsuleContent != null) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        capsuleContent()
+                AnimatedContent(
+                    targetState = contentExpanded,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "fluidPanelContent"
+                ) { isExpanded ->
+                    if (isExpanded) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            panelContent()
+                        }
+                    } else if (capsuleContent != null) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            capsuleContent()
+                        }
                     }
                 }
             }
-        }
         }
     }
 }
