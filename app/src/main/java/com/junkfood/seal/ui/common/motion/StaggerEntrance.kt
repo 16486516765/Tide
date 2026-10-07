@@ -72,13 +72,13 @@ fun StaggerEntranceItem(
     }
 }
 
-private const val STAGGER_DELAY_PER_ITEM_MS = 30L
-private const val STAGGER_MAX_DELAY_MS = 300L
-private const val FADE_IN_DURATION_MS = 180
+private const val STAGGER_DELAY_PER_ITEM_MS = 80L
+private const val STAGGER_MAX_DELAY_MS = 800L
+private const val FADE_IN_DURATION_MS = 450
 
 /** 上滑距离：item 高度的 12%（约 24~32dp，微弱弹性） */
 private const val ENTRANCE_SLIDE_FRACTION = 0.12f
 
-/** 弹簧参数：低刚度 + 高阻尼 = 微弱弹性，不晃眼 */
+/** 弹簧参数：低刚度 + 高阻尼 = 舒展不晃眼（B档放慢） */
 private const val SPRING_DAMPING_RATIO = 0.85f
-private const val SPRING_STIFFNESS = 260f
+private const val SPRING_STIFFNESS = 150f

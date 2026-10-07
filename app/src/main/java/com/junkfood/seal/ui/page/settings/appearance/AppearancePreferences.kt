@@ -263,14 +263,17 @@ private fun AppearancePreferencesContent(
                 var uiAnimationEnabled by remember {
                     mutableStateOf(UI_ANIMATION.getBoolean(true))
                 }
+                val toggleUiAnimation = {
+                    uiAnimationEnabled = !uiAnimationEnabled
+                    UI_ANIMATION.updateBoolean(uiAnimationEnabled)
+                }
                 PreferenceSwitchWithDivider(title = stringResource(id = R.string.ui_animation),
                     description = stringResource(id = R.string.ui_animation_desc),
                     icon = Icons.Outlined.Animation,
                     isChecked = uiAnimationEnabled,
-                    onClick = {
-                        uiAnimationEnabled = !uiAnimationEnabled
-                        UI_ANIMATION.updateBoolean(uiAnimationEnabled)
-                    })
+                    // 注意：Switch 本体的点击走 onChecked，整行的点击走 onClick，两个都要接
+                    onChecked = { toggleUiAnimation() },
+                    onClick = { toggleUiAnimation() })
                 // 需求3：动画预览入口 —— 胶囊按钮→面板的流体形态变换演示
                 PreferenceItem(
                     title = stringResource(id = R.string.ui_animation_preview),

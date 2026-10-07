@@ -155,7 +155,7 @@ fun TaskListPage(
                                 boundsTransform = { _, _ ->
                                     spring(
                                         dampingRatio = 0.9f,
-                                        stiffness = 320f
+                                        stiffness = 220f
                                     )
                                 }
                             )

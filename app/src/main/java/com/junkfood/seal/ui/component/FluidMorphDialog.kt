@@ -3,6 +3,8 @@ package com.junkfood.seal.ui.component
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
@@ -14,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -22,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -148,34 +155,57 @@ fun FluidMorphDialog(
 
 /**
  * 流体面板（Overlay 版）：全屏蒙层 + 面板从胶囊尺寸流体变换为完整面板。
- * 用于"预览"类场景：由外部按钮触发，入场即播放胶囊→面板的 morph。
+ * 用于"按钮→弹窗"场景：由外部按钮触发，入场播放胶囊→面板的 morph；
+ * 关闭时反向 morph 收回胶囊再消失（开合对称）。
+ *
+ * 尺寸（宽）与圆角同时做高阻尼弹簧变换（damping 0.9，几乎无回弹），
+ * 内容用淡入淡出交叉过渡。关闭动画总开关时退化为无动画的直接切换。
  */
 @Composable
 fun FluidMorphPanel(
     animationsEnabled: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    panelWidth: Dp = 340.dp,
+    capsuleContent: (@Composable RowScope.() -> Unit)? = null,
     panelContent: @Composable ColumnScope.() -> Unit
 ) {
-    // 入场：首帧为胶囊尺寸，下一帧切到面板尺寸，触发流体变换
-    var entrance by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { entrance = true }
+    val scope = rememberCoroutineScope()
+    // 用 Animatable 保证反向 morph 完成的时机精确
+    val widthAnim = remember { Animatable(COLLAPSED_WIDTH, Dp.VectorConverter) }
+    val cornerAnim = remember { Animatable(COLLAPSED_CORNER, Dp.VectorConverter) }
+    var contentExpanded by remember { mutableStateOf(false) }
 
-    val morphSpec: androidx.compose.animation.core.FiniteAnimationSpec<Dp> =
-        remember(animationsEnabled) {
-            if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 170f)
-            else snap()
+    val morphSpec: FiniteAnimationSpec<Dp> = remember(animationsEnabled) {
+        if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 130f)
+        else snap()
+    }
+
+    // 入场：胶囊 → 面板
+    LaunchedEffect(Unit) {
+        contentExpanded = true
+        if (animationsEnabled) {
+            launch { widthAnim.animateTo(panelWidth, morphSpec) }
+            launch { cornerAnim.animateTo(EXPANDED_CORNER, morphSpec) }
+        } else {
+            widthAnim.snapTo(panelWidth)
+            cornerAnim.snapTo(EXPANDED_CORNER)
         }
-    val containerWidth by animateDpAsState(
-        targetValue = if (entrance) 320.dp else 220.dp,
-        animationSpec = morphSpec,
-        label = "fluidPanelWidth"
-    )
-    val cornerRadius by animateDpAsState(
-        targetValue = if (entrance) 28.dp else 100.dp,
-        animationSpec = morphSpec,
-        label = "fluidPanelCorner"
-    )
+    }
+
+    // 关闭：面板 → 胶囊 → 消失（反向 morph）
+    fun dismiss() {
+        scope.launch {
+            if (animationsEnabled) {
+                contentExpanded = false
+                coroutineScope {
+                    launch { widthAnim.animateTo(COLLAPSED_WIDTH, morphSpec) }
+                    launch { cornerAnim.animateTo(COLLAPSED_CORNER, morphSpec) }
+                }
+            }
+            onDismissRequest()
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -188,28 +218,51 @@ fun FluidMorphPanel(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
-                ) { onDismissRequest() }
+                ) { dismiss() }
         )
-        Surface(
-            modifier = Modifier
-                .width(containerWidth)
-                .animateContentSize(
-                    animationSpec = if (animationsEnabled)
-                        spring(dampingRatio = 0.9f, stiffness = 170f)
-                    else snap()
-                )
-                .clip(RoundedCornerShape(cornerRadius)),
-            shape = RoundedCornerShape(cornerRadius),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 6.dp,
-            shadowElevation = 8.dp
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                panelContent()
+            // 面板最高占屏幕 85%，超出部分内部滚动
+            val maxPanelHeight = maxHeight * 0.85f
+            Surface(
+                modifier = Modifier
+                    .width(widthAnim.value)
+                    .heightIn(max = maxPanelHeight)
+                    .animateContentSize(animationSpec = morphSpec)
+                    .clip(RoundedCornerShape(cornerAnim.value)),
+                shape = RoundedCornerShape(cornerAnim.value),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 6.dp,
+                shadowElevation = 8.dp
+            ) {
+            AnimatedContent(
+                targetState = contentExpanded,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "fluidPanelContent"
+            ) { isExpanded ->
+                if (isExpanded) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        panelContent()
+                    }
+                } else if (capsuleContent != null) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        capsuleContent()
+                    }
+                }
             }
+        }
         }
     }
 }
+
+private val COLLAPSED_WIDTH = 220.dp
+private val COLLAPSED_CORNER = 100.dp
+private val EXPANDED_CORNER = 28.dp
 
 /**
  * 动画预览面板内容：迷你交错演示 + 说明

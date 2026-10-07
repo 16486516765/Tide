@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.AudioFile
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.DoneAll
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.DownloadDone
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.HighQuality
@@ -97,7 +98,9 @@ import com.junkfood.seal.util.FileUtil.getCookiesFile
 import com.junkfood.seal.util.PLAYLIST
 import com.junkfood.seal.util.PreferenceStrings
 import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.ui.component.FluidMorphPanel
 import com.junkfood.seal.util.PreferenceUtil.getBoolean
+import com.junkfood.seal.util.UI_ANIMATION
 import com.junkfood.seal.util.PreferenceUtil.getInt
 import com.junkfood.seal.util.PreferenceUtil.getString
 import com.junkfood.seal.util.PreferenceUtil.updateBoolean
@@ -127,6 +130,7 @@ fun DownloadSettingDialog(
     useDialog: Boolean = false,
     showDialog: Boolean = false,
     isQuickDownload: Boolean = false,
+    useMorphPanel: Boolean = false,
     onNavigateToCookieGeneratorPage: (String) -> Unit = {},
     onDownloadConfirm: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -507,7 +511,23 @@ fun DownloadSettingDialog(
             }
         }
 
-        if (!useDialog) {
+        if (useMorphPanel) {
+            // 流体形态：胶囊按钮 → 居中面板，无 bottom sheet / AlertDialog 自带动画
+            FluidMorphPanel(
+                animationsEnabled = UI_ANIMATION.getBoolean(true),
+                onDismissRequest = onDismissRequest,
+                panelWidth = 360.dp,
+                capsuleContent = {
+                    Icon(
+                        imageVector = Icons.Outlined.FileDownload,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            ) {
+                SheetContent(onDismissRequest = onDismissRequest)
+            }
+        } else if (!useDialog) {
             val useMD2BottomSheet = Build.VERSION.SDK_INT < 30
             if (useMD2BottomSheet) {
                 val sheetState = androidx.compose.material.rememberModalBottomSheetState(

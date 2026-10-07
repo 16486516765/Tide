@@ -284,6 +284,8 @@ fun DownloadPage(
 
         DownloadSettingDialog(useDialog = useDialog,
             showDialog = showDownloadDialog,
+            // 下载 FAB：胶囊按钮 → 居中面板流体 morph，替代 bottom sheet / AlertDialog 自带动画
+            useMorphPanel = true,
             onNavigateToCookieGeneratorPage = onNavigateToCookieGeneratorPage,
             onDownloadConfirm = { checkPermissionOrDownload() },
             onDismissRequest = {
