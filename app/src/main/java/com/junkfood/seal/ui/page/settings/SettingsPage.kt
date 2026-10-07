@@ -55,6 +55,7 @@ import com.junkfood.seal.util.EXTRACT_AUDIO
 import com.junkfood.seal.util.PreferenceUtil.getBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateInt
 import com.junkfood.seal.util.SHOW_SPONSOR_MSG
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 @SuppressLint("BatteryLife")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,12 +119,12 @@ fun SettingsPage(
         LazyColumn(
             modifier = Modifier.padding(it)
         ) {
-            item {
+            staggeredItem(index = 0) {
                 SettingTitle(text = stringResource(id = R.string.settings))
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
             ) {
-                item {
+                staggeredItem(index = 1) {
                     AnimatedVisibility(
                         visible = showBatteryHint && isActivityAvailable,
                         exit = shrinkVertically() + fadeOut()
@@ -141,7 +142,7 @@ fun SettingsPage(
                 }
             }
             if (!showBatteryHint && showSponsorMessage > 30)
-                item {
+                staggeredItem(index = 2) {
                     PreferencesHintCard(
                         title = stringResource(id = R.string.sponsor),
                         icon = Icons.Rounded.VolunteerActivism,
@@ -150,7 +151,7 @@ fun SettingsPage(
                         onNavigateTo(Route.DONATE)
                     }
                 }
-            item {
+            staggeredItem(index = 3) {
                 SettingItem(
                     title = stringResource(id = R.string.general_settings),
                     description = stringResource(
@@ -161,7 +162,7 @@ fun SettingsPage(
                     onNavigateTo(Route.GENERAL_DOWNLOAD_PREFERENCES)
                 }
             }
-            item {
+            staggeredItem(index = 4) {
                 SettingItem(
                     title = stringResource(id = R.string.download_directory),
                     description = stringResource(
@@ -172,7 +173,7 @@ fun SettingsPage(
                     onNavigateTo(Route.DOWNLOAD_DIRECTORY)
                 }
             }
-            item {
+            staggeredItem(index = 5) {
                 SettingItem(
                     title = stringResource(id = R.string.format),
                     description = stringResource(id = R.string.format_settings_desc),
@@ -181,7 +182,7 @@ fun SettingsPage(
                     onNavigateTo(Route.DOWNLOAD_FORMAT)
                 }
             }
-            item {
+            staggeredItem(index = 6) {
                 SettingItem(
                     title = stringResource(id = R.string.network),
                     description = stringResource(id = R.string.network_settings_desc),
@@ -190,7 +191,7 @@ fun SettingsPage(
                     onNavigateTo(Route.NETWORK_PREFERENCES)
                 }
             }
-            item {
+            staggeredItem(index = 7) {
                 SettingItem(
                     title = stringResource(id = R.string.custom_command),
                     description = stringResource(id = R.string.custom_command_desc),
@@ -199,7 +200,7 @@ fun SettingsPage(
                     onNavigateTo(Route.TEMPLATE)
                 }
             }
-            item {
+            staggeredItem(index = 8) {
                 SettingItem(
                     title = stringResource(id = R.string.look_and_feel),
                     description = stringResource(
@@ -210,7 +211,7 @@ fun SettingsPage(
                     onNavigateTo(Route.APPEARANCE)
                 }
             }
-            item {
+            staggeredItem(index = 9) {
                 SettingItem(
                     title = stringResource(id = R.string.interface_and_interaction),
                     description = stringResource(
@@ -221,7 +222,7 @@ fun SettingsPage(
                     onNavigateTo(Route.INTERACTION)
                 }
             }
-            item {
+            staggeredItem(index = 10) {
 
                 SettingItem(
                     title = stringResource(id = R.string.about), description = stringResource(

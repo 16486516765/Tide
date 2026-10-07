@@ -54,6 +54,7 @@ import com.junkfood.seal.ui.component.PreferenceSwitchWithDivider
 import com.junkfood.seal.util.AUTO_UPDATE
 import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.ToastUtil
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 private const val releaseURL = "https://github.com/JunkFood02/Seal/releases"
 private const val repoUrl = "https://github.com/JunkFood02/Seal"
@@ -112,28 +113,28 @@ fun AboutPage(
         )
     }, content = {
         LazyColumn(modifier = Modifier.padding(it)) {
-            item {
+            staggeredItem(index = 0) {
                 PreferenceItem(
                     title = stringResource(R.string.readme),
                     description = stringResource(R.string.readme_desc),
                     icon = Icons.Outlined.Description,
                 ) { openUrl(repoUrl) }
             }
-            item {
+            staggeredItem(index = 1) {
                 PreferenceItem(
                     title = stringResource(R.string.release),
                     description = stringResource(R.string.release_desc),
                     icon = Icons.Outlined.NewReleases,
                 ) { openUrl(releaseURL) }
             }
-            item {
+            staggeredItem(index = 2) {
                 PreferenceItem(
                     title = stringResource(R.string.github_issue),
                     description = stringResource(R.string.github_issue_desc),
                     icon = Icons.Outlined.ContactSupport,
                 ) { openUrl(githubIssueUrl) }
             }
-            item {
+            staggeredItem(index = 3) {
                 PreferenceItem(
                     title = stringResource(id = R.string.sponsor),
                     description = stringResource(id = R.string.sponsor_desc),
@@ -143,28 +144,28 @@ fun AboutPage(
                     onNavigateToDonatePage()
                 }
             }
-            item {
+            staggeredItem(index = 4) {
                 PreferenceItem(
                     title = stringResource(R.string.telegram_channel),
                     description = telegramChannelUrl,
                     icon = painterResource(id = R.drawable.icons8_telegram_app)
                 ) { openUrl(telegramChannelUrl) }
             }
-            item {
+            staggeredItem(index = 5) {
                 PreferenceItem(
                     title = stringResource(R.string.matrix_space),
                     description = matrixSpaceUrl,
                     icon = painterResource(id = R.drawable.icons8_matrix)
                 ) { openUrl(matrixSpaceUrl) }
             }
-            item {
+            staggeredItem(index = 6) {
                 PreferenceItem(
                     title = stringResource(id = R.string.credits),
                     description = stringResource(id = R.string.credits_desc),
                     icon = Icons.Outlined.AutoAwesome,
                 ) { onNavigateToCreditsPage() }
             }
-            item {
+            staggeredItem(index = 7) {
                 PreferenceSwitchWithDivider(
                     title = stringResource(R.string.auto_update),
                     description = stringResource(R.string.check_for_updates_desc),
@@ -178,7 +179,7 @@ fun AboutPage(
                     }
                 )
             }
-            item {
+            staggeredItem(index = 8) {
                 PreferenceItem(
                     title = stringResource(R.string.version),
                     description = versionName,

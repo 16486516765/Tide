@@ -44,6 +44,7 @@ import com.junkfood.seal.util.PreferenceUtil.getValue
 import com.junkfood.seal.util.PreferenceUtil.updateBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateValue
 import com.junkfood.seal.util.RATE_LIMIT
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,13 +87,13 @@ fun NetworkPreferences(
 
             LazyColumn(Modifier.padding(it)) {
                 if (isCustomCommandEnabled)
-                    item {
+                    staggeredItem(index = 0) {
                         PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
                     }
-                item {
+                staggeredItem(index = 1) {
                     PreferenceSubtitle(text = stringResource(R.string.general_settings))
                 }
-                item {
+                staggeredItem(index = 2) {
                     var isRateLimitEnabled by remember {
                         mutableStateOf(getValue(RATE_LIMIT))
                     }
@@ -113,7 +114,7 @@ fun NetworkPreferences(
                         onClick = { showRateLimitDialog = true }
                     )
                 }
-                item {
+                staggeredItem(index = 3) {
                     var isDownloadWithCellularEnabled by remember {
                         mutableStateOf(getValue(CELLULAR_DOWNLOAD))
                     }
@@ -133,11 +134,11 @@ fun NetworkPreferences(
                     )
                 }
 
-                item {
+                staggeredItem(index = 4) {
                     PreferenceSubtitle(text = stringResource(id = R.string.advanced_settings))
                 }
 
-                item {
+                staggeredItem(index = 5) {
                     PreferenceSwitch(
                         title = stringResource(R.string.aria2),
                         icon = Icons.Outlined.Bolt,
@@ -151,7 +152,7 @@ fun NetworkPreferences(
                         }
                     )
                 }
-                item {
+                staggeredItem(index = 6) {
                     PreferenceSwitchWithDivider(
                         title = stringResource(id = R.string.proxy),
                         description = stringResource(id = R.string.proxy_desc),
@@ -165,7 +166,7 @@ fun NetworkPreferences(
                         enabled = !isCustomCommandEnabled
                     )
                 }
-                item {
+                staggeredItem(index = 7) {
                     PreferenceItem(
                         title = stringResource(id = R.string.concurrent_download),
                         description = stringResource(R.string.concurrent_download_desc),
@@ -173,7 +174,7 @@ fun NetworkPreferences(
                         enabled = !aria2c && !isCustomCommandEnabled,
                     ) { showConcurrentDownloadDialog = true }
                 }
-                item {
+                staggeredItem(index = 8) {
                     PreferenceSwitch(
                         title = stringResource(R.string.force_ipv4),
                         description = stringResource(id = R.string.force_ipv4_desc),
@@ -185,7 +186,7 @@ fun NetworkPreferences(
                         FORCE_IPV4.updateBoolean(forceIpv4)
                     }
                 }
-                item {
+                staggeredItem(index = 9) {
                     PreferenceItem(title = stringResource(R.string.cookies),
                         description = stringResource(R.string.cookies_desc),
                         icon = Icons.Outlined.Cookie,

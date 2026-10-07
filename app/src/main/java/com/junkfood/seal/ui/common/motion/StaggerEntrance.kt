@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import com.junkfood.seal.util.PreferenceUtil.getBoolean
+import com.junkfood.seal.util.UI_ANIMATION
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
@@ -82,3 +85,25 @@ private const val ENTRANCE_SLIDE_FRACTION = 0.12f
 /** 弹簧参数：低刚度 + 高阻尼 = 舒展不晃眼（B档放慢） */
 private const val SPRING_DAMPING_RATIO = 0.85f
 private const val SPRING_STIFFNESS = 150f
+
+/**
+ * LazyColumn 交错 item 的便捷包裹。
+ *
+ * 把 `item { ... }` 换成 `staggeredItem(index = N) { ... }`（index 从 0 递增），
+ * 即可让该项入场时带交错延迟 + 微弱弹性上滑。每次进入页面都播放，
+ * 动画总开关关闭时直接渲染无动画。
+ */
+fun LazyListScope.staggeredItem(
+    index: Int,
+    content: @Composable () -> Unit
+) {
+    item {
+        StaggerEntranceItem(
+            index = index,
+            playAnimation = true,
+            onPlayed = {},
+            animationsEnabled = remember { UI_ANIMATION.getBoolean(true) },
+            content = content
+        )
+    }
+}

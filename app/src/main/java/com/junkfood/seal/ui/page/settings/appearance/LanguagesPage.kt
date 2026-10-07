@@ -54,6 +54,7 @@ import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.setLanguage
 import com.junkfood.seal.util.toDisplayName
 import java.util.Locale
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 
 @Composable
@@ -132,7 +133,7 @@ private fun LanguagePageImpl(
                 modifier = Modifier
                     .padding(it)
             ) {
-                item {
+                staggeredItem(index = 0) {
                     PreferencesHintCard(
                         title = stringResource(R.string.translate),
                         description = stringResource(R.string.translate_desc),
@@ -141,7 +142,7 @@ private fun LanguagePageImpl(
                 }
 
 
-                item {
+                staggeredItem(index = 1) {
                     PreferenceSingleChoiceItem(
                         text = stringResource(id = R.string.follow_system),
                         selected = !localeSet.contains(selectedLocale),
@@ -150,7 +151,7 @@ private fun LanguagePageImpl(
                 }
 
                 for (locale in localeSet) {
-                    item {
+                    staggeredItem(index = 2) {
                         PreferenceSingleChoiceItem(
                             text = locale.toDisplayName(),
                             selected = selectedLocale == locale,
@@ -161,7 +162,7 @@ private fun LanguagePageImpl(
 
 
                 if (isSystemLocaleSettingsAvailable) {
-                    item {
+                    staggeredItem(index = 3) {
                         HorizontalDivider()
                         Surface(
                             modifier = Modifier.clickable(

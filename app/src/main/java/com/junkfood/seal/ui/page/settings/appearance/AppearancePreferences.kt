@@ -86,6 +86,7 @@ import com.junkfood.seal.util.paletteStyles
 import com.junkfood.seal.util.toDisplayName
 import com.kyant.monet.LocalTonalPalettes
 import com.kyant.monet.PaletteStyle
+import com.junkfood.seal.ui.common.motion.StaggerEntranceItem
 import com.kyant.monet.TonalPalettes
 import com.kyant.monet.TonalPalettes.Companion.toTonalPalettes
 import com.kyant.monet.a1
@@ -186,10 +187,18 @@ private fun AppearancePreferencesContent(
                     .padding(it)
                     .verticalScroll(rememberScrollState())
             ) {
+                val animationsEnabled = remember { UI_ANIMATION.getBoolean(true) }
 
-                VideoCard(
-                    modifier = Modifier.padding(18.dp), thumbnailUrl = image
-                )
+                StaggerEntranceItem(
+                    index = 0,
+                    playAnimation = true,
+                    onPlayed = {},
+                    animationsEnabled = animationsEnabled
+                ) {
+                    VideoCard(
+                        modifier = Modifier.padding(18.dp), thumbnailUrl = image
+                    )
+                }
                 val pageCount = ColorList.size + 1
 
                 val pagerState =
@@ -199,13 +208,19 @@ private fun AppearancePreferencesContent(
                         pageCount
                     }
 
-                HorizontalPager(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clearAndSetSemantics { },
-                    state = pagerState,
-                    contentPadding = PaddingValues(horizontal = 12.dp)
-                ) { page ->
+                StaggerEntranceItem(
+                    index = 1,
+                    playAnimation = true,
+                    onPlayed = {},
+                    animationsEnabled = animationsEnabled
+                ) {
+                    HorizontalPager(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clearAndSetSemantics { },
+                        state = pagerState,
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) { page ->
                     if (page < pageCount - 1) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -231,35 +246,57 @@ private fun AppearancePreferencesContent(
                         }
                     }
                 }
+                }
 
-                HorizontalPagerIndicator(pagerState = pagerState,
-                    pageCount = pageCount,
-                    modifier = Modifier
-                        .clearAndSetSemantics { }
-                        .align(Alignment.CenterHorizontally)
-                        .padding(vertical = 12.dp),
-                    activeColor = MaterialTheme.colorScheme.primary,
-                    inactiveColor = MaterialTheme.colorScheme.outlineVariant,
-                    indicatorHeight = 6.dp,
-                    indicatorWidth = 6.dp)
+                StaggerEntranceItem(
+                    index = 2,
+                    playAnimation = true,
+                    onPlayed = {},
+                    animationsEnabled = animationsEnabled
+                ) {
+                    HorizontalPagerIndicator(pagerState = pagerState,
+                        pageCount = pageCount,
+                        modifier = Modifier
+                            .clearAndSetSemantics { }
+                            .align(Alignment.CenterHorizontally)
+                            .padding(vertical = 12.dp),
+                        activeColor = MaterialTheme.colorScheme.primary,
+                        inactiveColor = MaterialTheme.colorScheme.outlineVariant,
+                        indicatorHeight = 6.dp,
+                        indicatorWidth = 6.dp)
+                }
                 if (DynamicColors.isDynamicColorAvailable()) {
-                    PreferenceSwitch(title = stringResource(id = R.string.dynamic_color),
-                        description = stringResource(
-                            id = R.string.dynamic_color_desc
-                        ),
-                        icon = Icons.Outlined.Colorize,
-                        isChecked = LocalDynamicColorSwitch.current,
-                        onClick = {
-                            PreferenceUtil.switchDynamicColor()
-                        })
+                    StaggerEntranceItem(
+                        index = 3,
+                        playAnimation = true,
+                        onPlayed = {},
+                        animationsEnabled = animationsEnabled
+                    ) {
+                        PreferenceSwitch(title = stringResource(id = R.string.dynamic_color),
+                            description = stringResource(
+                                id = R.string.dynamic_color_desc
+                            ),
+                            icon = Icons.Outlined.Colorize,
+                            isChecked = LocalDynamicColorSwitch.current,
+                            onClick = {
+                                PreferenceUtil.switchDynamicColor()
+                            })
+                    }
                 }
                 val isDarkTheme = LocalDarkTheme.current.isDarkTheme()
-                PreferenceSwitchWithDivider(title = stringResource(id = R.string.dark_theme),
-                    icon = if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                    isChecked = isDarkTheme,
-                    description = LocalDarkTheme.current.getDarkThemeDesc(),
-                    onChecked = { PreferenceUtil.modifyDarkThemePreference(if (isDarkTheme) OFF else ON) },
-                    onClick = { onNavigateTo(Route.DARK_THEME) })
+                StaggerEntranceItem(
+                    index = 4,
+                    playAnimation = true,
+                    onPlayed = {},
+                    animationsEnabled = animationsEnabled
+                ) {
+                    PreferenceSwitchWithDivider(title = stringResource(id = R.string.dark_theme),
+                        icon = if (isDarkTheme) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
+                        isChecked = isDarkTheme,
+                        description = LocalDarkTheme.current.getDarkThemeDesc(),
+                        onChecked = { PreferenceUtil.modifyDarkThemePreference(if (isDarkTheme) OFF else ON) },
+                        onClick = { onNavigateTo(Route.DARK_THEME) })
+                }
                 var uiAnimationEnabled by remember {
                     mutableStateOf(UI_ANIMATION.getBoolean(true))
                 }
@@ -267,25 +304,46 @@ private fun AppearancePreferencesContent(
                     uiAnimationEnabled = !uiAnimationEnabled
                     UI_ANIMATION.updateBoolean(uiAnimationEnabled)
                 }
-                PreferenceSwitchWithDivider(title = stringResource(id = R.string.ui_animation),
-                    description = stringResource(id = R.string.ui_animation_desc),
-                    icon = Icons.Outlined.Animation,
-                    isChecked = uiAnimationEnabled,
-                    // 注意：Switch 本体的点击走 onChecked，整行的点击走 onClick，两个都要接
-                    onChecked = { toggleUiAnimation() },
-                    onClick = { toggleUiAnimation() })
+                StaggerEntranceItem(
+                    index = 5,
+                    playAnimation = true,
+                    onPlayed = {},
+                    animationsEnabled = animationsEnabled
+                ) {
+                    PreferenceSwitchWithDivider(title = stringResource(id = R.string.ui_animation),
+                        description = stringResource(id = R.string.ui_animation_desc),
+                        icon = Icons.Outlined.Animation,
+                        isChecked = uiAnimationEnabled,
+                        // 注意：Switch 本体的点击走 onChecked，整行的点击走 onClick，两个都要接
+                        onChecked = { toggleUiAnimation() },
+                        onClick = { toggleUiAnimation() })
+                }
                 // 需求3：动画预览入口 —— 胶囊按钮→面板的流体形态变换演示
-                PreferenceItem(
-                    title = stringResource(id = R.string.ui_animation_preview),
-                    icon = Icons.Outlined.PlayArrow,
-                    onClick = onPreviewClick
-                )
-                if (Build.VERSION.SDK_INT >= 24) {
+                StaggerEntranceItem(
+                    index = 6,
+                    playAnimation = true,
+                    onPlayed = {},
+                    animationsEnabled = animationsEnabled
+                ) {
                     PreferenceItem(
-                        title = stringResource(R.string.language),
-                        icon = Icons.Outlined.Language,
-                        description = Locale.getDefault().toDisplayName()
-                    ) { onNavigateTo(Route.LANGUAGES) }
+                        title = stringResource(id = R.string.ui_animation_preview),
+                        icon = Icons.Outlined.PlayArrow,
+                        onClick = onPreviewClick
+                    )
+                }
+                if (Build.VERSION.SDK_INT >= 24) {
+                    StaggerEntranceItem(
+                        index = 7,
+                        playAnimation = true,
+                        onPlayed = {},
+                        animationsEnabled = animationsEnabled
+                    ) {
+                        PreferenceItem(
+                            title = stringResource(R.string.language),
+                            icon = Icons.Outlined.Language,
+                            description = Locale.getDefault().toDisplayName()
+                        ) { onNavigateTo(Route.LANGUAGES) }
+                    }
                 }
             }
         }

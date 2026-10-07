@@ -27,6 +27,7 @@ import com.junkfood.seal.util.DarkThemePreference.Companion.FOLLOW_SYSTEM
 import com.junkfood.seal.util.DarkThemePreference.Companion.OFF
 import com.junkfood.seal.util.DarkThemePreference.Companion.ON
 import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,28 +59,28 @@ fun DarkThemePreferences(onNavigateBack: () -> Unit) {
         }, content = {
             LazyColumn(modifier = Modifier.padding(it)) {
                 if (Build.VERSION.SDK_INT >= 29)
-                    item {
+                    staggeredItem(index = 0) {
                         PreferenceSingleChoiceItem(
                             text = stringResource(R.string.follow_system),
                             selected = darkThemePreference.darkThemeValue == FOLLOW_SYSTEM
                         ) { PreferenceUtil.modifyDarkThemePreference(FOLLOW_SYSTEM) }
                     }
-                item {
+                staggeredItem(index = 1) {
                     PreferenceSingleChoiceItem(
                         text = stringResource(R.string.on),
                         selected = darkThemePreference.darkThemeValue == ON
                     ) { PreferenceUtil.modifyDarkThemePreference(ON) }
                 }
-                item {
+                staggeredItem(index = 2) {
                     PreferenceSingleChoiceItem(
                         text = stringResource(R.string.off),
                         selected = darkThemePreference.darkThemeValue == OFF
                     ) { PreferenceUtil.modifyDarkThemePreference(OFF) }
                 }
-                item {
+                staggeredItem(index = 3) {
                     PreferenceSubtitle(text = stringResource(R.string.additional_settings))
                 }
-                item {
+                staggeredItem(index = 4) {
                     PreferenceSwitch(
                         title = stringResource(R.string.high_contrast),
                         icon = Icons.Outlined.Contrast,

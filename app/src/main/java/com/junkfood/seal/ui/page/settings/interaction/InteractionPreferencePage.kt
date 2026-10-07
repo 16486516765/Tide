@@ -24,6 +24,7 @@ import com.junkfood.seal.util.DOWNLOAD_TYPE_INITIALIZATION
 import com.junkfood.seal.util.PreferenceUtil.getInt
 import com.junkfood.seal.util.PreferenceUtil.updateInt
 import com.junkfood.seal.util.USE_PREVIOUS_SELECTION
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,11 +53,11 @@ fun InteractionPreferencePage(modifier: Modifier = Modifier, onBack: () -> Unit)
         )
     }) {
         LazyColumn(modifier = Modifier.padding(it)) {
-            item {
+            staggeredItem(index = 0) {
                 PreferenceSubtitle(text = stringResource(id = R.string.settings_before_download))
             }
 
-            item {
+            staggeredItem(index = 1) {
                 PreferenceItem(
                     title = stringResource(id = R.string.download_type),
                     description = when (initialType) {

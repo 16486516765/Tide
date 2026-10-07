@@ -68,6 +68,7 @@ import com.junkfood.seal.util.SUBTITLE
 import com.junkfood.seal.util.VIDEO_CLIP
 import com.junkfood.seal.util.VIDEO_FORMAT
 import com.junkfood.seal.util.VIDEO_QUALITY
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,13 +132,13 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                 )
             }
             LazyColumn(Modifier.padding(it)) {
-                if (isCustomCommandEnabled) item {
+                if (isCustomCommandEnabled) staggeredItem(index = 0) {
                     PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
                 }
-                item {
+                staggeredItem(index = 1) {
                     PreferenceSubtitle(text = stringResource(id = R.string.audio))
                 }
-                item {
+                staggeredItem(index = 2) {
                     PreferenceSwitch(title = stringResource(id = R.string.extract_audio),
                         description = stringResource(
                             id = R.string.extract_audio_summary
@@ -150,14 +151,14 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                             PreferenceUtil.updateValue(EXTRACT_AUDIO, audioSwitch)
                         })
                 }
-                item {
+                staggeredItem(index = 3) {
                     PreferenceItem(title = stringResource(id = R.string.audio_format_preference),
                         description = audioFormat,
                         icon = Icons.Outlined.AudioFile,
                         enabled = !isCustomCommandEnabled && !isFormatSortingEnabled,
                         onClick = { showAudioFormatDialog = true })
                 }
-                item {
+                staggeredItem(index = 4) {
                     PreferenceItem(
                         title = stringResource(id = R.string.audio_quality),
                         description = audioQuality,
@@ -166,7 +167,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         enabled = !isCustomCommandEnabled && !isFormatSortingEnabled
                     )
                 }
-                item {
+                staggeredItem(index = 5) {
                     PreferenceSwitchWithDivider(title = stringResource(R.string.convert_audio_format),
                         description = convertFormat,
                         icon = Icons.Outlined.Sync,
@@ -178,7 +179,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                             AUDIO_CONVERT.updateBoolean(convertAudio)
                         })
                 }
-                item {
+                staggeredItem(index = 6) {
                     PreferenceSwitch(title = stringResource(id = R.string.embed_metadata),
                         description = stringResource(
                             id = R.string.embed_metadata_desc
@@ -191,7 +192,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                             EMBED_METADATA.updateBoolean(embedMetadata)
                         })
                 }
-                item {
+                staggeredItem(index = 7) {
                     PreferenceSwitch(
                         title = stringResource(R.string.crop_artwork),
                         description = stringResource(R.string.crop_artwork_desc),
@@ -203,10 +204,10 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         PreferenceUtil.updateValue(CROP_ARTWORK, isArtworkCroppingEnabled)
                     }
                 }
-                item {
+                staggeredItem(index = 8) {
                     PreferenceSubtitle(text = stringResource(id = R.string.video))
                 }
-                item {
+                staggeredItem(index = 9) {
                     PreferenceItem(
                         title = stringResource(R.string.video_format_preference),
                         description = PreferenceStrings.getVideoFormatLabel(videoFormat),
@@ -214,14 +215,14 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         enabled = !audioSwitch && !isCustomCommandEnabled && !isFormatSortingEnabled
                     ) { showVideoFormatDialog = true }
                 }
-                item {
+                staggeredItem(index = 10) {
                     PreferenceItem(
                         title = stringResource(id = R.string.video_quality),
                         description = PreferenceStrings.getVideoResolutionDescComp(videoQuality),
                         icon = Icons.Outlined.HighQuality,
                         enabled = !audioSwitch && !isCustomCommandEnabled && !isFormatSortingEnabled
                     ) { showVideoQualityDialog = true }
-                }/*                item {
+                }/*                staggeredItem(index = 11) {
                                     var embedThumbnail by EMBED_THUMBNAIL.booleanState
 
                                     PreferenceSwitch(
@@ -236,7 +237,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                                     }
                                 }*/
 
-                item {
+                staggeredItem(index = 12) {
                     PreferenceSwitch(
                         title = stringResource(id = R.string.remux_container_mkv),
                         description = stringResource(
@@ -252,15 +253,15 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                     )
                 }
                 if (downloadSubtitle && embedSubtitle) {
-                    item {
+                    staggeredItem(index = 13) {
                         PreferenceInfo(text = stringResource(id = R.string.embed_subtitles_mkv_msg))
                     }
                 }
 
-                item {
+                staggeredItem(index = 14) {
                     PreferenceSubtitle(text = stringResource(id = R.string.advanced_settings))
                 }
-                item {
+                staggeredItem(index = 15) {
 
                     PreferenceItem(
                         title = stringResource(id = R.string.subtitle),
@@ -269,7 +270,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         description = stringResource(id = R.string.subtitle_desc),
                     ) { navigateToSubtitlePage() }
                 }
-                item {
+                staggeredItem(index = 16) {
                     PreferenceSwitchWithDivider(title = stringResource(id = R.string.format_sorting),
                         icon = Icons.Outlined.Sort,
                         description = stringResource(id = R.string.format_sorting_desc),
@@ -281,7 +282,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         },
                         onClick = { showFormatSorterDialog = true })
                 }
-                item {
+                staggeredItem(index = 17) {
                     PreferenceSwitch(
                         title = stringResource(id = R.string.format_selection),
                         icon = Icons.Outlined.VideoSettings,
@@ -293,7 +294,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         PreferenceUtil.updateValue(FORMAT_SELECTION, isFormatSelectionEnabled)
                     }
                 }
-                item {
+                staggeredItem(index = 18) {
                     PreferenceSwitch(
                         title = stringResource(id = R.string.clip_video),
                         description = stringResource(
@@ -310,7 +311,7 @@ fun DownloadFormatPreferences(onNavigateBack: () -> Unit, navigateToSubtitlePage
                         }
                     }
                 }
-                item {
+                staggeredItem(index = 19) {
                     PreferenceSwitch(
                         title = stringResource(id = R.string.merge_audiostream),
                         description = stringResource(

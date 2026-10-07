@@ -113,6 +113,7 @@ import com.junkfood.seal.util.SUBDIRECTORY_PLAYLIST_TITLE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 
 private const val ytdlpOutputTemplateReference = "https://github.com/yt-dlp/yt-dlp#output-template"
@@ -254,12 +255,12 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
         LazyColumn(modifier = Modifier.padding(it)) {
 
             if (isCustomCommandEnabled)
-                item {
+                staggeredItem(index = 0) {
                     PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
                 }
 
             if (showDirectoryAlert)
-                item {
+                staggeredItem(index = 1) {
                     PreferencesHintCard(
                         title = stringResource(R.string.permission_issue),
                         description = stringResource(R.string.permission_issue_desc),
@@ -275,11 +276,11 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                         }
                     }
                 }
-            item {
+            staggeredItem(index = 2) {
                 PreferenceSubtitle(text = stringResource(R.string.general_settings))
             }
             if (!isCustomCommandEnabled) {
-                item {
+                staggeredItem(index = 3) {
                     PreferenceItem(
                         title = stringResource(id = R.string.video_directory),
                         description = videoDirectoryText,
@@ -289,7 +290,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                         openDirectoryChooser(directory = Directory.VIDEO)
                     }
                 }
-                item {
+                staggeredItem(index = 4) {
                     PreferenceItem(
                         title = stringResource(id = R.string.audio_directory),
                         description = audioDirectoryText,
@@ -300,7 +301,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     }
                 }
             }
-            item {
+            staggeredItem(index = 5) {
                 PreferenceItem(
                     title = stringResource(id = R.string.custom_command_directory),
                     description = customCommandDirectory.ifEmpty { stringResource(id = R.string.set_directory_desc) },
@@ -309,7 +310,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     showCustomCommandDirectoryDialog = true
                 }
             }
-            item {
+            staggeredItem(index = 6) {
                 PreferenceSwitchWithDivider(
                     title = stringResource(id = R.string.sdcard_directory),
                     description = sdcardUri.ifEmpty { stringResource(id = R.string.set_directory_desc) },
@@ -330,7 +331,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     }
                 )
             }
-            item {
+            staggeredItem(index = 7) {
                 PreferenceItem(
                     title = stringResource(id = R.string.subdirectory),
                     description = stringResource(id = R.string.subdirectory_desc),
@@ -340,10 +341,10 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     showSubdirectoryDialog = true
                 }
             }
-            item {
+            staggeredItem(index = 8) {
                 PreferenceSubtitle(text = stringResource(R.string.privacy))
             }
-            item {
+            staggeredItem(index = 9) {
                 PreferenceSwitch(
                     title = stringResource(id = R.string.private_directory),
                     description = stringResource(
@@ -358,10 +359,10 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     }
                 )
             }
-            item {
+            staggeredItem(index = 10) {
                 PreferenceSubtitle(text = stringResource(R.string.advanced_settings))
             }
-            item {
+            staggeredItem(index = 11) {
                 PreferenceItem(title = stringResource(R.string.output_template),
                     description = stringResource(id = R.string.output_template_desc),
                     icon = Icons.Outlined.FolderSpecial,
@@ -369,7 +370,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     onClick = { showOutputTemplateDialog = true }
                 )
             }
-            item {
+            staggeredItem(index = 12) {
                 var restrictFilenames by RESTRICT_FILENAMES.booleanState
                 PreferenceSwitch(
                     title = stringResource(id = R.string.restrict_filenames),
@@ -381,7 +382,7 @@ fun DownloadDirectoryPreferences(onNavigateBack: () -> Unit) {
                     RESTRICT_FILENAMES.updateBoolean(restrictFilenames)
                 }
             }
-            item {
+            staggeredItem(index = 13) {
                 PreferenceItem(
                     title = stringResource(R.string.clear_temp_files),
                     description = stringResource(

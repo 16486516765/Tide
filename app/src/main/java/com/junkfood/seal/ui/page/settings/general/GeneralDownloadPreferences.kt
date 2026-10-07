@@ -121,6 +121,7 @@ import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.junkfood.seal.ui.common.motion.staggeredItem
 
 @OptIn(
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class
@@ -203,10 +204,10 @@ fun GeneralDownloadPreferences(
 //                    SettingTitle(text = stringResource(id = R.string.general_settings))
 //                }
                 if (isCustomCommandEnabled)
-                    item {
+                    staggeredItem(index = 0) {
                         PreferenceInfo(text = stringResource(id = R.string.custom_command_enabled_hint))
                     }
-                item {
+                staggeredItem(index = 1) {
                     var ytdlpVersion by remember {
                         mutableStateOf(
                             YoutubeDL.getInstance().version(context.applicationContext)
@@ -254,7 +255,7 @@ fun GeneralDownloadPreferences(
                         }
                     )
                 }
-                item {
+                staggeredItem(index = 2) {
                     PreferenceSwitch(title = stringResource(id = R.string.download_notification),
                         description = stringResource(
                             id = if (isNotificationPermissionGranted) R.string.download_notification_desc
@@ -278,7 +279,7 @@ fun GeneralDownloadPreferences(
                         })
                 }
 
-                item {
+                staggeredItem(index = 3) {
                     var configureBeforeDownload by CONFIGURE.booleanState
                     PreferenceSwitch(title = stringResource(id = R.string.settings_before_download),
                         description = stringResource(
@@ -295,7 +296,7 @@ fun GeneralDownloadPreferences(
                 }
 
 
-                item {
+                staggeredItem(index = 4) {
                     var thumbnailSwitch by remember {
                         mutableStateOf(
                             PreferenceUtil.getValue(THUMBNAIL)
@@ -313,7 +314,7 @@ fun GeneralDownloadPreferences(
                             PreferenceUtil.updateValue(THUMBNAIL, thumbnailSwitch)
                         })
                 }
-                item {
+                staggeredItem(index = 5) {
                     PreferenceSwitch(
                         title = stringResource(R.string.print_details),
                         description = stringResource(R.string.print_details_desc),
@@ -327,11 +328,11 @@ fun GeneralDownloadPreferences(
                     )
                 }
 
-                item {
+                staggeredItem(index = 6) {
                     PreferenceSubtitle(text = stringResource(id = R.string.privacy))
                 }
 
-                item {
+                staggeredItem(index = 7) {
                     PreferenceSwitch(
                         title = stringResource(R.string.private_mode),
                         description = stringResource(R.string.private_mode_desc),
@@ -347,7 +348,7 @@ fun GeneralDownloadPreferences(
                         }
                     )
                 }
-                item {
+                staggeredItem(index = 8) {
                     PreferenceSwitch(
                         title = stringResource(R.string.disable_preview),
                         description = stringResource(R.string.disable_preview_desc),
@@ -364,10 +365,10 @@ fun GeneralDownloadPreferences(
                     )
                 }
 
-                item {
+                staggeredItem(index = 9) {
                     PreferenceSubtitle(text = stringResource(R.string.advanced_settings))
                 }
-                item {
+                staggeredItem(index = 10) {
                     PreferenceSwitch(
                         title = stringResource(id = R.string.download_playlist),
                         onClick = {
@@ -383,7 +384,7 @@ fun GeneralDownloadPreferences(
                     )
                 }
 
-                item {
+                staggeredItem(index = 11) {
                     PreferenceSwitchWithDivider(
                         title = stringResource(id = R.string.download_archive),
                         onClick = {
@@ -405,7 +406,7 @@ fun GeneralDownloadPreferences(
                     )
                 }
 
-                item {
+                staggeredItem(index = 12) {
                     PreferenceSwitchWithDivider(title = stringResource(R.string.sponsorblock),
                         description = stringResource(
                             R.string.sponsorblock_desc
@@ -420,7 +421,7 @@ fun GeneralDownloadPreferences(
                         onClick = { showSponsorBlockDialog = true })
                 }
 
-                if (downloadSubtitle) item {
+                if (downloadSubtitle) staggeredItem(index = 13) {
                     PreferenceInfo(text = stringResource(id = R.string.subtitle_sponsorblock))
                 }
             }
@@ -454,7 +455,7 @@ fun GeneralDownloadPreferences(
             icon = { Icon(Icons.Outlined.SyncAlt, null) },
             text = {
                 LazyColumn() {
-                    item {
+                    staggeredItem(index = 14) {
                         Text(
                             text = stringResource(id = R.string.update_channel),
                             modifier = Modifier
@@ -465,7 +466,7 @@ fun GeneralDownloadPreferences(
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
-                    item {
+                    staggeredItem(index = 15) {
                         DialogSingleChoiceItem(
                             text = "yt-dlp",
                             selected = ytdlpUpdateChannel == YT_DLP_STABLE,
@@ -474,7 +475,7 @@ fun GeneralDownloadPreferences(
                             ytdlpUpdateChannel = YT_DLP_STABLE
                         }
                     }
-                    item {
+                    staggeredItem(index = 16) {
                         DialogSingleChoiceItem(
                             text = "yt-dlp-nightly-builds",
                             selected = ytdlpUpdateChannel == YT_DLP_NIGHTLY,
@@ -484,7 +485,7 @@ fun GeneralDownloadPreferences(
                             ytdlpUpdateChannel = YT_DLP_NIGHTLY
                         }
                     }
-                    item {
+                    staggeredItem(index = 17) {
                         Text(
                             text = stringResource(id = R.string.additional_settings),
                             modifier = Modifier
@@ -495,7 +496,7 @@ fun GeneralDownloadPreferences(
                             style = MaterialTheme.typography.labelLarge
                         )
                     }
-                    item {
+                    staggeredItem(index = 18) {
                         var expanded by remember { mutableStateOf(false) }
 
                         ExposedDropdownMenuBox(
