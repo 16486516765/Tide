@@ -195,11 +195,11 @@ fun FluidMorphPanel(
     )
 
     val morphSpec: FiniteAnimationSpec<Dp> = remember(animationsEnabled) {
-        if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 130f)
+        if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 170f)
         else snap()
     }
     val offsetSpec: FiniteAnimationSpec<IntOffset> = remember(animationsEnabled) {
-        if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 130f)
+        if (animationsEnabled) spring(dampingRatio = 0.9f, stiffness = 170f)
         else snap()
     }
 
@@ -216,17 +216,21 @@ fun FluidMorphPanel(
         // 面板最高占屏幕 85%，超出部分内部滚动
         val maxPanelHeight = maxHeight * 0.85f
 
-        // 入场：胶囊 → 面板
+        // 入场：胶囊 → 面板（内容延迟淡入，等宽度展开约 60%）
         LaunchedEffect(Unit) {
-            contentExpanded = true
             if (animationsEnabled) {
                 scrimTarget = 0.4f
                 launch { widthAnim.animateTo(panelWidth, morphSpec) }
                 launch { cornerAnim.animateTo(EXPANDED_CORNER, morphSpec) }
+                launch {
+                    delay(180)
+                    contentExpanded = true
+                }
             } else {
                 widthAnim.snapTo(panelWidth)
                 cornerAnim.snapTo(EXPANDED_CORNER)
                 scrimTarget = 0.4f
+                contentExpanded = true
             }
         }
 
@@ -268,11 +272,6 @@ fun FluidMorphPanel(
                     .graphicsLayer { alpha = alphaAnim.value }
                     .width(widthAnim.value)
                     .heightIn(max = maxPanelHeight)
-                    .animateContentSize(
-                        animationSpec = if (animationsEnabled)
-                            spring(dampingRatio = 0.9f, stiffness = 130f)
-                        else snap()
-                    )
                     .clip(RoundedCornerShape(cornerAnim.value)),
                 shape = RoundedCornerShape(cornerAnim.value),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
