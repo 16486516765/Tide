@@ -44,6 +44,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -734,24 +735,31 @@ fun FABs(
     Column(
         modifier = modifier.padding(6.dp), horizontalAlignment = Alignment.End
     ) {
-        FloatingActionButton(
+        // 粘贴：胶囊形态，标准尺寸
+        ExtendedFloatingActionButton(
             onClick = pasteCallback,
-            content = {
+            icon = {
                 Icon(
                     Icons.Outlined.ContentPaste, contentDescription = stringResource(R.string.paste)
                 )
             },
+            text = {},
             modifier = Modifier.padding(vertical = 12.dp),
         )
-        FloatingActionButton(
+        // 下载：胶囊形态，加大一号（主操作强调）
+        ExtendedFloatingActionButton(
             onClick = downloadCallback,
-            content = {
+            icon = {
                 Icon(
                     Icons.Outlined.FileDownload,
-                    contentDescription = stringResource(R.string.download)
+                    contentDescription = stringResource(R.string.download),
+                    modifier = Modifier.size(28.dp)
                 )
             },
-            modifier = Modifier.padding(vertical = 12.dp),
+            text = {},
+            modifier = Modifier
+                .padding(vertical = 12.dp)
+                .size(width = 76.dp, height = 64.dp),
         )
     }
 
