@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -409,12 +410,19 @@ fun DownloadPageImpl(
             pasteCallback = pasteCallback
         )
     }) {
-        Column(
+        // 平板适配：内容区大屏上限制最大宽度并居中
+        Box(
             modifier = Modifier
                 .padding(it)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 600.dp)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
             TitleWithProgressIndicator(
                 showProgressIndicator = downloaderState is Downloader.State.FetchingInfo,
                 isDownloadingPlaylist = downloaderState is Downloader.State.DownloadingPlaylist,
@@ -502,6 +510,7 @@ fun DownloadPageImpl(
                 NavigationBarSpacer()
                 Spacer(modifier = Modifier.height(160.dp))
             }
+        }
         }
     }
 }
@@ -735,7 +744,7 @@ fun FABs(
     Column(
         modifier = modifier.padding(6.dp), horizontalAlignment = Alignment.End
     ) {
-        // 粘贴：胶囊形态，标准尺寸
+        // 粘贴：宽胶囊，图标+文字，标准尺寸
         ExtendedFloatingActionButton(
             onClick = pasteCallback,
             icon = {
@@ -743,10 +752,10 @@ fun FABs(
                     Icons.Outlined.ContentPaste, contentDescription = stringResource(R.string.paste)
                 )
             },
-            text = {},
+            text = { Text(stringResource(R.string.paste)) },
             modifier = Modifier.padding(vertical = 12.dp),
         )
-        // 下载：胶囊形态，加大一号（主操作强调）
+        // 下载：宽胶囊，图标+文字，加大一号（主操作强调）
         ExtendedFloatingActionButton(
             onClick = downloadCallback,
             icon = {
@@ -756,10 +765,10 @@ fun FABs(
                     modifier = Modifier.size(28.dp)
                 )
             },
-            text = {},
+            text = { Text(stringResource(R.string.download)) },
             modifier = Modifier
                 .padding(vertical = 12.dp)
-                .size(width = 76.dp, height = 64.dp),
+                .height(64.dp),
         )
     }
 
